@@ -36,7 +36,7 @@ impl TemplateApp {
 }
 
 impl eframe::App for TemplateApp {
-    /// Called by the frame work to save state before shutdown.
+    /// Called by the framework to save state before shutdown.
     fn save(&mut self, storage: &mut dyn eframe::Storage) {
         eframe::set_value(storage, eframe::APP_KEY, self);
     }
@@ -50,17 +50,17 @@ impl eframe::App for TemplateApp {
             // The top panel is often a good place for a menu bar:
 
             egui::menu::bar(ui, |ui| {
-                // NOTE: no File->Quit on web pages!
-                let is_web = cfg!(target_arch = "wasm32");
-                if !is_web {
-                    ui.menu_button("File", |ui| {
-                        if ui.button("Quit").clicked() {
-                            ctx.send_viewport_cmd(egui::ViewportCommand::Close);
-                        }
-                    });
-                    ui.add_space(16.0);
-                }
-
+                ui.menu_button("File", |ui| {
+                    if ui.button("Quit").clicked() {
+                        ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+                    }
+                });
+                ui.menu_button("Open", |ui| {
+                    if ui.button("Quit").clicked() {
+                        todo!("Implement file opening")
+                    }
+                });
+                ui.add_space(16.0);
                 egui::widgets::global_theme_preference_buttons(ui);
             });
         });
