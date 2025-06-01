@@ -16,7 +16,7 @@ fn main() -> eframe::Result {
         ..Default::default()
     };
     eframe::run_native(
-        "eframe template",
+        "tomltasks",
         native_options,
         Box::new(|cc| Ok(Box::new(tomltasks::TemplateApp::new(cc)))),
     )

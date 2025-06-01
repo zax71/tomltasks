@@ -1,5 +1,3 @@
-use egui::Align2;
-
 /// We derive Deserialize/Serialize so we can persist app state on shutdown.
 #[derive(serde::Deserialize, serde::Serialize)]
 #[serde(default)] // if we add new fields, give them default values when deserializing old state
@@ -71,19 +69,6 @@ impl eframe::App for TemplateApp {
             });
         });
 
-        if self.show_no_text_dialog {
-            egui::Window::new("Error: No text was entered in the answer")
-                .collapsible(false)
-                .resizable(false)
-                .show(ctx, |ui| {
-                    ui.vertical_centered(|ui| {
-                        if ui.button("Okay").clicked() {
-                            self.show_no_text_dialog = false;
-                        }
-                    })
-                });
-        }
-
         egui::CentralPanel::default().show(ctx, |ui| {
             // The central panel the region left after adding TopPanel's and SidePanel's
             ui.heading("The question");
@@ -104,6 +89,22 @@ impl eframe::App for TemplateApp {
                 egui::warn_if_debug_build(ui);
             });
         });
+
+        // The dialog that shows when no text is entered in to the answer box
+        if self.show_no_text_dialog {
+            egui::Window::new("Error: No text was entered in the answer")
+                .collapsible(false)
+                .resizable(false)
+                .fade_in(true)
+                .fade_out(true)
+                .show(ctx, |ui| {
+                    ui.vertical_centered(|ui| {
+                        if ui.button("Okay").clicked() {
+                            self.show_no_text_dialog = false;
+                        }
+                    })
+                });
+        }
     }
 }
 
