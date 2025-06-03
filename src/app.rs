@@ -61,7 +61,10 @@ impl eframe::App for TemplateApp {
                         ctx.send_viewport_cmd(egui::ViewportCommand::Close);
                     }
                     if ui.button("Open").clicked() {
-                        println!("{:?}", files::pick_toml())
+                        match files::pick_json() {
+                            Some(file_path) => println!("{:?}", file_path),
+                            None => (),
+                        }
                     }
                 });
                 ui.menu_button("Theme", |ui| {
