@@ -100,19 +100,21 @@ impl eframe::App for TemplateApp {
             let current_question = match self.config_data.questions.get(self.question_id) {
                 Some(question) => question,
                 None => {
+                    // Probably not loaded questions
+                    if self.config_data.questions.len() == 0 {
+                        ui.heading( "No question pack is loaded");
+                        ui.label("Try loading a question pack with File > Open.");
+                    }
                     // Finished questions
-                    if self.question_id + 1 > self.config_data.questions.len() {
+                    else if self.question_id + 1 > self.config_data.questions.len() {
                         ui.heading("You finished 🎉");
                         if ui.button("Restart").clicked() {
                             self.question_id = 0;
                         }
                         ui.label("Or load another question pack from File > Open");
                     }
-                    // Probably not loaded questions
                     else {
-                        ui.heading(
-                            "No question is loaded, try loading a question pack in File > Open",
-                        );
+                        ui.label("Uhh, the app is in a weird state. There seems to be questions but there are no questions at the same time...");
                     }
                     return;
                 }
@@ -145,23 +147,11 @@ impl eframe::App for TemplateApp {
             }
 
             ui.with_layout(egui::Layout::bottom_up(egui::Align::LEFT), |ui| {
-                powered_by_egui_and_eframe(ui);
                 egui::warn_if_debug_build(ui);
+            });
+            ui.with_layout(egui::Layout::bottom_up(egui::Align::RIGHT), |ui| {
+                ui.label(format!("Set: {}", self.config_data.set_name))
             });
         });
     }
-}
-
-fn powered_by_egui_and_eframe(ui: &mut egui::Ui) {
-    ui.horizontal(|ui| {
-        ui.spacing_mut().item_spacing.x = 0.0;
-        ui.label("Powered by ");
-        ui.hyperlink_to("egui", "https://github.com/emilk/egui");
-        ui.label(" and ");
-        ui.hyperlink_to(
-            "eframe",
-            "https://github.com/emilk/egui/tree/master/crates/eframe",
-        );
-        ui.label(".");
-    });
 }
