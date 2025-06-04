@@ -133,13 +133,13 @@ impl eframe::App for TemplateApp {
                     .contains(&self.answer.to_lowercase())
                 {
                     self.toasts_handler
-                        .success(format!("Question {} correct!", self.question_id))
+                        .success(format!("Question {} correct!", self.question_id+1))
                         .duration(Some(Duration::from_secs(5)));
                     self.question_id += 1;
                     self.answer = "".to_string();
                 } else {
                     self.toasts_handler
-                        .info(format!("Question {} Incorrect :(", self.question_id))
+                        .info(format!("Question {} Incorrect :(", self.question_id+1))
                         .duration(Some(Duration::from_secs(5)));
                 }
             }
@@ -148,7 +148,7 @@ impl eframe::App for TemplateApp {
                 egui::warn_if_debug_build(ui);
             });
             ui.with_layout(egui::Layout::bottom_up(egui::Align::RIGHT), |ui| {
-                ui.label(format!("Set: {}", self.config_data.set_name))
+                ui.label(format!("{} Question {}/{}", self.config_data.set_name, self.question_id+1, self.config_data.questions.len()))
             });
         });
     }
