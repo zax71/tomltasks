@@ -15,11 +15,13 @@ struct ErrorAnnounceState {
 #[derive(Deserialize, Serialize, Default)]
 #[serde(default)] // if we add new fields, give them default values when deserializing old state
 pub struct TemplateApp {
-    answer: String,
     error_state: ErrorAnnounceState,
     config_data: ConfigFile,
+    question_id: usize,
 
     #[serde(skip)] // Don't preserve state on reboot
+    answer: String,
+    #[serde(skip)]
     toasts_handler: Toasts,
 }
 
@@ -31,8 +33,6 @@ impl TemplateApp {
             return eframe::get_value(storage, eframe::APP_KEY).unwrap_or_default();
         }
 
-        // Init egui-notify
-
         // Load default values for struct
         Default::default()
     }
@@ -40,10 +40,14 @@ impl TemplateApp {
     /// Shows an error modal to the user and logs the error in the console
     fn show_error(&mut self, text: &str) {
         self.toasts_handler
-            .info(text)
+            .error(text)
             .duration(Some(Duration::from_secs(5)));
 
         println!("Error: {}", text);
+    }
+
+    fn reset_data(&mut self) {
+        *self = TemplateApp::default();
     }
 }
 
@@ -69,11 +73,21 @@ impl eframe::App for TemplateApp {
                     if ui.button("Open").clicked() {
                         // Prompt the user to select a JSON file
                         match files::pick_json() {
-                            Ok(config_data) => self.config_data = config_data,
+                            Ok(config_data) => {
+                                self.reset_data();
+                                self.config_data = config_data
+                            }
                             Err(e) => self.show_error(&e.to_string()),
                         }
                     }
                 });
+
+                ui.menu_button("Debug", |ui| {
+                    if ui.button("Reset data").clicked() {
+                        self.reset_data();
+                    }
+                });
+
                 ui.menu_button("Theme", |ui| {
                     egui::widgets::global_theme_preference_buttons(ui);
                 });
@@ -83,7 +97,28 @@ impl eframe::App for TemplateApp {
 
         egui::CentralPanel::default().show(ctx, |ui| {
             // The central panel the region left after adding TopPanel's and SidePanel's
-            ui.heading("The question");
+            let current_question = match self.config_data.questions.get(self.question_id) {
+                Some(question) => question,
+                None => {
+                    // Finished questions
+                    if self.question_id + 1 > self.config_data.questions.len() {
+                        ui.heading("You finished 🎉");
+                        if ui.button("Restart").clicked() {
+                            self.question_id = 0;
+                        }
+                        ui.label("Or load another question pack from File > Open");
+                    }
+                    // Probably not loaded questions
+                    else {
+                        ui.heading(
+                            "No question is loaded, try loading a question pack in File > Open",
+                        );
+                    }
+                    return;
+                }
+            };
+
+            ui.heading(&current_question.question);
             ui.horizontal(|ui| {
                 ui.label("Answer: ");
                 ui.text_edit_singleline(&mut self.answer);
@@ -92,7 +127,20 @@ impl eframe::App for TemplateApp {
                 if self.answer.is_empty() {
                     self.show_error("No text was entered in the answer");
                 } else {
-                    println!("Answer is {}", self.answer);
+                    if current_question
+                        .answers
+                        .contains(&self.answer.to_lowercase())
+                    {
+                        self.toasts_handler
+                            .success(format!("Question {} correct!", self.question_id))
+                            .duration(Some(Duration::from_secs(5)));
+                        self.question_id += 1;
+                        self.answer = "".to_string();
+                    } else {
+                        self.toasts_handler
+                            .info(format!("Question {} Incorrect :(", self.question_id))
+                            .duration(Some(Duration::from_secs(5)));
+                    }
                 }
             }
 
