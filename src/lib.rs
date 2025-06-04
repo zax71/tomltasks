@@ -2,5 +2,5 @@
 
 mod app;
 pub mod files;
-pub mod question;
+pub mod data_structs;
 pub use app::TemplateApp;
