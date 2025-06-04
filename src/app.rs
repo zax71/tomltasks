@@ -101,7 +101,7 @@ impl eframe::App for TemplateApp {
                 Some(question) => question,
                 None => {
                     // Probably not loaded questions
-                    if self.config_data.questions.len() == 0 {
+                    if self.config_data.questions.is_empty() {
                         ui.heading( "No question pack is loaded");
                         ui.label("Try loading a question pack with File > Open.");
                     }
