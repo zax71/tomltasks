@@ -128,21 +128,19 @@ impl eframe::App for TemplateApp {
             if ui.button("Check answer").clicked() {
                 if self.answer.is_empty() {
                     self.show_error("No text was entered in the answer");
+                } else if current_question
+                    .answers
+                    .contains(&self.answer.to_lowercase())
+                {
+                    self.toasts_handler
+                        .success(format!("Question {} correct!", self.question_id))
+                        .duration(Some(Duration::from_secs(5)));
+                    self.question_id += 1;
+                    self.answer = "".to_string();
                 } else {
-                    if current_question
-                        .answers
-                        .contains(&self.answer.to_lowercase())
-                    {
-                        self.toasts_handler
-                            .success(format!("Question {} correct!", self.question_id))
-                            .duration(Some(Duration::from_secs(5)));
-                        self.question_id += 1;
-                        self.answer = "".to_string();
-                    } else {
-                        self.toasts_handler
-                            .info(format!("Question {} Incorrect :(", self.question_id))
-                            .duration(Some(Duration::from_secs(5)));
-                    }
+                    self.toasts_handler
+                        .info(format!("Question {} Incorrect :(", self.question_id))
+                        .duration(Some(Duration::from_secs(5)));
                 }
             }
 
