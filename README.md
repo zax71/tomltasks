@@ -1,6 +1,6 @@
 # TomlTasks
 
-A basic quiz made in Rust using [eframe](https://crates.io/crates/eframe).
+A basic quiz made in Rust (yes, it's 🚀**BLAZING FAST**🚀) using [eframe](https://crates.io/crates/eframe).
 
 ![A demo of the application](.github/assets/demo.png)
 
