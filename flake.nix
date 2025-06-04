@@ -25,6 +25,10 @@
       {
         devShells.default = mkShell rec {
           buildInputs = [
+            (pkgs.rust-bin.stable.latest.default.override {
+              extensions = [ "rust-src" ];
+            })
+
             # Rust
             rust-bin.stable.latest.default
             trunk

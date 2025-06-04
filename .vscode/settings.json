@@ -3,5 +3,6 @@
     "eframe",
     "egui",
     "tomltasks"
-  ]
+  ],
+  "nixEnvSelector.nixFile": "${workspaceFolder}/flake.nix"
 }

@@ -1,43 +1,49 @@
-use crate::files;
+use std::time::Duration;
 
-/// We derive Deserialize/Serialize so we can persist app state on shutdown.
-#[derive(serde::Deserialize, serde::Serialize)]
-#[serde(default)] // if we add new fields, give them default values when deserializing old state
-pub struct TemplateApp {
-    // Example stuff:
-    answer: String,
+use crate::{data_structs::ConfigFile, files};
+use egui_notify::Toasts;
+use serde::{Deserialize, Serialize};
 
-    #[serde(skip)] // This how you opt-out of serialization of a field
-    value: f32,
-    checkbox: bool,
-    show_no_text_dialog: bool,
+/// This is used for the error modal
+#[derive(Default, Serialize, Deserialize)]
+struct ErrorAnnounceState {
+    shown: bool,
+    text: String,
 }
 
-impl Default for TemplateApp {
-    fn default() -> Self {
-        Self {
-            // Example stuff:
-            answer: "".to_owned(),
-            value: 2.7,
-            checkbox: false,
-            show_no_text_dialog: false,
-        }
-    }
+/// We derive Deserialize/Serialize so we can persist app state on shutdown.
+#[derive(Deserialize, Serialize, Default)]
+#[serde(default)] // if we add new fields, give them default values when deserializing old state
+pub struct TemplateApp {
+    answer: String,
+    error_state: ErrorAnnounceState,
+    config_data: ConfigFile,
+
+    #[serde(skip)] // Don't preserve state on reboot
+    toasts_handler: Toasts,
 }
 
 impl TemplateApp {
     /// Called once before the first frame.
     pub fn new(cc: &eframe::CreationContext<'_>) -> Self {
-        // This is also where you can customize the look and feel of egui using
-        // `cc.egui_ctx.set_visuals` and `cc.egui_ctx.set_fonts`.
-
         // Load previous app state (if any).
-        // Note that you must enable the `persistence` feature for this to work.
         if let Some(storage) = cc.storage {
             return eframe::get_value(storage, eframe::APP_KEY).unwrap_or_default();
         }
 
+        // Init egui-notify
+
+        // Load default values for struct
         Default::default()
+    }
+
+    /// Shows an error modal to the user and logs the error in the console
+    fn show_error(&mut self, text: &str) {
+        self.toasts_handler
+            .info(text)
+            .duration(Some(Duration::from_secs(5)));
+
+        println!("Error: {}", text);
     }
 }
 
@@ -49,8 +55,8 @@ impl eframe::App for TemplateApp {
 
     /// Called each time the UI needs repainting, which may be many times per second.
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        // Put your widgets into a `SidePanel`, `TopBottomPanel`, `CentralPanel`, `Window` or `Area`.
-        // For inspiration and more examples, go to https://emilk.github.io/egui
+        // Show Toasts
+        self.toasts_handler.show(ctx);
 
         egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
             // The top panel is often a good place for a menu bar:
@@ -61,8 +67,10 @@ impl eframe::App for TemplateApp {
                         ctx.send_viewport_cmd(egui::ViewportCommand::Close);
                     }
                     if ui.button("Open").clicked() {
-                        if let Some(file_path) = files::pick_json() {
-                            println!("{:?}", file_path)
+                        // Prompt the user to select a JSON file
+                        match files::pick_json() {
+                            Ok(config_data) => self.config_data = config_data,
+                            Err(e) => self.show_error(&e.to_string()),
                         }
                     }
                 });
@@ -82,7 +90,7 @@ impl eframe::App for TemplateApp {
             });
             if ui.button("Check answer").clicked() {
                 if self.answer.is_empty() {
-                    self.show_no_text_dialog = true;
+                    self.show_error("No text was entered in the answer");
                 } else {
                     println!("Answer is {}", self.answer);
                 }
@@ -93,22 +101,6 @@ impl eframe::App for TemplateApp {
                 egui::warn_if_debug_build(ui);
             });
         });
-
-        // The dialog that shows when no text is entered in to the answer box
-        if self.show_no_text_dialog {
-            egui::Window::new("Error: No text was entered in the answer")
-                .collapsible(false)
-                .resizable(false)
-                .fade_in(true)
-                .fade_out(true)
-                .show(ctx, |ui| {
-                    ui.vertical_centered(|ui| {
-                        if ui.button("Okay").clicked() {
-                            self.show_no_text_dialog = false;
-                        }
-                    })
-                });
-        }
     }
 }
 

@@ -1,16 +1,22 @@
-use anyhow::{Context, Result};
+use anyhow::{anyhow, Context, Result};
 use rfd::FileDialog;
 use serde_json;
-use std::path::PathBuf;
+use std::fs;
 
 use crate::data_structs::ConfigFile;
 
 /// Requests the user to pick a json file and returns the path to it. Fails if user cancels request
-pub fn pick_json() -> Option<PathBuf> {
-    FileDialog::new()
+pub fn pick_json() -> Result<ConfigFile> {
+    let file_path = FileDialog::new()
         .add_filter("json", &["json"])
         .set_directory("~")
         .pick_file()
+        .ok_or(anyhow!("Failed file picker. User probably canceled it"))?;
+
+    let data = fs::read_to_string(file_path)
+        .context("Failed to read the string file selected in the file browser")?;
+
+    load_str(&data)
 }
 
 /// Deserializes the JSON to a Vec<Question>. Fails if JSON is malformed
