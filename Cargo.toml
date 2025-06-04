@@ -3,7 +3,8 @@ name = "tomltasks"
 version = "0.1.0"
 authors = ["zax71 <zabax32@gmail.com>"]
 edition = "2021"
-include = ["LICENSE-APACHE", "LICENSE-MIT", "**/*.rs", "Cargo.toml"]
+include = ["LICENSE", "**/*.rs", "Cargo.toml"]
+license = "MIT"
 rust-version = "1.81"
 
 [package.metadata.docs.rs]
