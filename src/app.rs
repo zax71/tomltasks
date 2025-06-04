@@ -67,9 +67,6 @@ impl eframe::App for TemplateApp {
 
             egui::menu::bar(ui, |ui| {
                 ui.menu_button("File", |ui| {
-                    if ui.button("Quit").clicked() {
-                        ctx.send_viewport_cmd(egui::ViewportCommand::Close);
-                    }
                     if ui.button("Open").clicked() {
                         // Prompt the user to select a JSON file
                         match files::pick_json() {
@@ -79,6 +76,9 @@ impl eframe::App for TemplateApp {
                             }
                             Err(e) => self.show_error(&e.to_string()),
                         }
+                    }
+                    if ui.button("Quit").clicked() {
+                        ctx.send_viewport_cmd(egui::ViewportCommand::Close);
                     }
                 });
 
