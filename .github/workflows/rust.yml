@@ -15,6 +15,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
+      - uses: Swatinem/rust-cache@v2
       - uses: actions-rs/cargo@v1
         with:
           command: check
@@ -28,6 +29,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
+      - uses: Swatinem/rust-cache@v2
       - run: sudo apt-get install libxcb-render0-dev libxcb-shape0-dev libxcb-xfixes0-dev libxkbcommon-dev libssl-dev
       - uses: actions-rs/cargo@v1
         with:
@@ -43,6 +45,7 @@ jobs:
         with:
           toolchain: stable
           components: rustfmt
+      - uses: Swatinem/rust-cache@v2
       - uses: actions-rs/cargo@v1
         with:
           command: fmt
@@ -57,6 +60,7 @@ jobs:
         with:
           toolchain: stable
           components: clippy
+      - uses: Swatinem/rust-cache@v2
       - uses: actions-rs/cargo@v1
         with:
           command: clippy
