@@ -61,9 +61,8 @@ impl eframe::App for TemplateApp {
                         ctx.send_viewport_cmd(egui::ViewportCommand::Close);
                     }
                     if ui.button("Open").clicked() {
-                        match files::pick_json() {
-                            Some(file_path) => println!("{:?}", file_path),
-                            None => (),
+                        if let Some(file_path) = files::pick_json() {
+                            println!("{:?}", file_path)
                         }
                     }
                 });
@@ -82,7 +81,7 @@ impl eframe::App for TemplateApp {
                 ui.text_edit_singleline(&mut self.answer);
             });
             if ui.button("Check answer").clicked() {
-                if self.answer.len() == 0 {
+                if self.answer.is_empty() {
                     self.show_no_text_dialog = true;
                 } else {
                     println!("Answer is {}", self.answer);
